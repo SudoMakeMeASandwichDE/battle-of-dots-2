@@ -39,6 +39,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			print(obj.global_position)
 			get_tree().get_current_scene().add_child(obj)
 			waypoints.append(obj.global_position)
+			selected_num = 0
+			relabel()
 		elif self in selected_troupe and selected_num < stacked_num:
 			if waypoint_objs.size() == 0:
 				var newtroupe = troupe_scene.instantiate()
@@ -54,7 +56,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_tree().get_current_scene().add_child(newtroupe)
 				newtroupe.relabel()
 				stacked_num = stacked_num - selected_num
-				relabel()
 				reset()
 	elif event.is_action_pressed("select"):
 		var troupes = get_tree().get_nodes_in_group("troupes")
@@ -69,9 +70,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				selected_troupe.append(self)
 			if selected_num == 0:
 				selected_num = 1
+				relabel()
 			elif selected_num < stacked_num:
 				selected_num += 1
-			print(selected_num)
+				relabel()
 			toggle_color()
 			get_viewport().set_input_as_handled()
 			return
@@ -86,7 +88,7 @@ func _process(delta: float) -> void:
 			var troupes = get_tree().get_nodes_in_group("troupes")
 			for troupe in troupes:
 				if global_position.distance_to(troupe.global_position) < 6 and troupe.moving == false and troupe != self:
-					troupe.stacked_num += 1
+					troupe.stacked_num += stacked_num
 					troupe.relabel()
 					queue_free()
 					return
@@ -113,6 +115,7 @@ func reset():
 	for obj in waypoint_objs:
 		obj.queue_free()
 	waypoint_objs.clear()
+	relabel()
 	
 func toggle_color():
 	if self in selected_troupe:
@@ -126,6 +129,9 @@ func relabel():
 		label.queue_free()
 	if stacked_num > 1:
 		label = Label.new()
-		label.text = str(stacked_num)
+		if selected_num > 0:
+			label.text = str(selected_num) + "/" + str(stacked_num)
+		else:
+			label.text = str(stacked_num)
 		add_child(label)
 	
