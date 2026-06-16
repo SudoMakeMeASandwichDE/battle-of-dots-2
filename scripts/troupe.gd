@@ -7,6 +7,7 @@ var troupe_scene: PackedScene = preload("res://scenes/troupe.tscn")
 @export var color_unselected := Color(1, 0, 0, 1)
 @export var color_selected := Color(0.8, 0.0, 0.0, 1.0)
 var label: Label = null
+var line: Line2D = null
 var waypoints := [] # waypoind Vector2 coords
 var selected := false # apply new waypoints if true
 var target: Vector2 # next waypoint
@@ -14,6 +15,7 @@ var target_num := 0 # index of next target
 var path_end := false # true when troupe reached last waypoint
 var waypoint_objs := [] # collects waypoint game objects
 var moving := false
+var starting_pos: Vector2
 var stacked_num := 1
 var selected_num := 0
 
@@ -26,8 +28,8 @@ func _draw():
 func _ready():
 	queue_redraw()
 	add_to_group("troupes")
-	if stacked_num > 1:
-		relabel()
+	starting_pos = global_position
+	relabel()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("waypoint_on_cursor"):
@@ -41,6 +43,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			waypoints.append(obj.global_position)
 			selected_num = 0
 			relabel()
+			continue_line()
 		if self in selected_troupe and moving:
 			var obj = waypoint.instantiate()
 			waypoint_objs.append(obj)
@@ -48,6 +51,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			print(obj.global_position)
 			get_tree().get_current_scene().add_child(obj)
 			waypoints.append(obj.global_position)
+			continue_line()
 		elif self in selected_troupe and selected_num < stacked_num:
 			if waypoint_objs.size() == 0:
 				var newtroupe = troupe_scene.instantiate()
@@ -62,6 +66,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				newtroupe.waypoints.append(obj.global_position)
 				get_tree().get_current_scene().add_child(newtroupe)
 				newtroupe.relabel()
+				newtroupe.continue_line()
 				stacked_num = stacked_num - selected_num
 				reset()
 	elif event.is_action_pressed("select"):
@@ -107,7 +112,10 @@ func _process(delta: float) -> void:
 			target = waypoints[target_num]
 			if global_position.distance_to(waypoints[target_num]) < 1.0:
 				target_num += 1
+				line.remove_point(0)
 			global_position = global_position.move_toward(target, 50*delta)
+			if line:
+				line.set_point_position(0, global_position)
 func reset():
 	# reset everything eg when last waypoint is reached
 	path_end = true
@@ -121,7 +129,10 @@ func reset():
 		toggle_color()
 	for obj in waypoint_objs:
 		obj.queue_free()
+	if line:
+		line.queue_free()
 	waypoint_objs.clear()
+	starting_pos = global_position
 	relabel()
 	
 func toggle_color():
@@ -141,4 +152,18 @@ func relabel():
 		else:
 			label.text = str(stacked_num)
 		add_child(label)
-	
+
+func continue_line():
+	if line:
+		line.queue_free()
+	line = Line2D.new()
+	line.add_point(starting_pos)
+	for point in waypoints:
+		line.add_point(point)
+	line.default_color = Color.DIM_GRAY
+	line.width = 3
+	get_tree().get_current_scene().add_child(line)
+	var parent_node = line.get_parent()
+	parent_node.move_child(line, 0)
+
+		
