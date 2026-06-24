@@ -9,10 +9,23 @@ To play or develop, clone the repository and import the project folder into Godo
 ## Controls
 |action                                                  |key                  |
 |--------------------------------------------------------|---------------------|
-|select a unit                                         |right mouse button   |
-|select a whole stack after selecting one unit of stack|A
+|select a unit                                           |right mouse button   |
+|select a whole stack after selecting one unit of stack  |A
 |new waypoint                                            |left mouse button    |
-|deselect all units and stop selected unit           |C                    |
-|stop a moving unit                                    |right click on unit|
+|deselect all units and stop selected unit               |C                    |
+|stop a moving unit                                      |right click on unit|
 
 Sending a unit on top of another unit will stack them. To select a certain number of units on a stack, right click that number of times on the stack.
+
+
+Roadmap
+---
+
+- Multiplayer(1v1,2v2,etc.)
+- Custom maps/ automatically produced maps
+- Campaign
+- Start menu
+- Basic game logic
+- Bot implementation
+- visual features
+
