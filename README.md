@@ -28,4 +28,5 @@ Roadmap
 - Basic game logic
 - Bot implementation
 - visual features
-
+- Releases
+- Spawns
